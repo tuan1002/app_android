@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Thêm Bữa Ăn"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/add_meal_button"
+        android:layout_width="match_parent"
+        android:layout_height="60sp"
+        android:text="Bữa sáng"
+        android:textStyle="bold" >
+    </Button>
+
+    <Button
+        android:id="@+id/cancel_button"
+        android:layout_width="match_parent"
+        android:layout_height="60sp"
+        android:text="Bữa trưa"
+        android:textStyle="bold"
+        android:backgroundTint="@color/yellow"
+        />
+
+    <Button
+        android:id="@+id/cancel_buttone"
+        android:layout_width="match_parent"
+        android:layout_height="60sp"
+        android:text="Bữa tối"
+        android:textStyle="bold"
+        android:backgroundTint="@color/red"
+
+        />
+
+    <TextView
+        android:id="@+id/dialog_title2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hoạt động"
+        android:textSize="18sp"
+        android:paddingTop="20sp"
+        android:textStyle="bold" />
+    <Button
+        android:id="@+id/cancel_buttones"
+        android:layout_width="match_parent"
+        android:layout_height="60sp"
+        android:text="Tập luyện"
+        android:textStyle="bold"
+        />
+</LinearLayout>

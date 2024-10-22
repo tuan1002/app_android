@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">App_N+1</string>
+    <string name="title_home">Home</string>
+    <string name="title_find">Find</string>
+    <string name="title_favorite">Favorite</string>
+    <string name="title_aboutme">Me</string>
+</resources>
