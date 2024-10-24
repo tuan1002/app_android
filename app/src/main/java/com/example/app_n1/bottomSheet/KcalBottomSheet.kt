@@ -21,24 +21,24 @@ class KcalBottomSheet : BottomSheetDialogFragment() {
         // Inflate layout cho KcalBottomSheet
         val view = inflater.inflate(R.layout.activity_kcal_botton_sheet, container, false)
 
-        val numberEditText = view.findViewById<EditText>(R.id.numberDisplay)
+        val numberEditText = view.findViewById<EditText>(R.id.numberDisplayKcal)
 
-        view.findViewById<ImageView>(R.id.decreaseButton).setOnClickListener {
+        view.findViewById<ImageView>(R.id.decreaseButtonKcal).setOnClickListener {
             if (currentValue > 500) {
                 currentValue--
                 numberEditText.setText(currentValue.toString())
             }
         }
 
-        view.findViewById<ImageView>(R.id.increaseButton).setOnClickListener {
+        view.findViewById<ImageView>(R.id.increaseButtonKcal).setOnClickListener {
             currentValue++
             numberEditText.setText(currentValue.toString())
         }
 
-        view.findViewById<Button>(R.id.closeButton).setOnClickListener {
+        view.findViewById<Button>(R.id.closeButtonKcal).setOnClickListener {
             dismiss() // Đóng Bottom Sheet khi nhấn nút
         }
 
-        return inflater.inflate(R.layout.activity_kcal_botton_sheet, container, false)
+        return view // Trả về view đã inflate
     }
 }

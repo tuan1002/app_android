@@ -21,7 +21,7 @@
         android:layout_marginTop="25sp">
 
         <ImageView
-            android:id="@+id/decreaseButton"
+            android:id="@+id/decreaseButtonAge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/baseline_arrow_left_24"
@@ -32,7 +32,7 @@
 
 
         <EditText
-            android:id="@+id/numberDisplay"
+            android:id="@+id/numberDisplayAge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="500"
@@ -44,7 +44,7 @@
             android:layout_marginRight="30sp"/>
 
         <ImageView
-            android:id="@+id/increaseButton"
+            android:id="@+id/increaseButtonAge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/baseline_arrow_right_24"
@@ -55,7 +55,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/closeButton"
+        android:id="@+id/closeButtonAge"
         android:layout_width="200sp"
         android:layout_height="wrap_content"
         android:text="Lưu"

@@ -39,6 +39,6 @@ class HeightBottomSheet : BottomSheetDialogFragment() {
             dismiss()
         }
 
-        return inflater.inflate(R.layout.activity_height_bottom_sheet, container, false)
+        return view // Trả về view đã inflate
     }
 }

@@ -21,7 +21,7 @@
         android:layout_marginTop="25sp">
 
         <ImageView
-            android:id="@+id/decreaseButton"
+            android:id="@+id/decreaseButtonKcal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/baseline_arrow_left_24"
@@ -32,7 +32,7 @@
 
 
         <EditText
-            android:id="@+id/numberDisplay"
+            android:id="@+id/numberDisplayKcal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="500"
@@ -42,7 +42,7 @@
             android:inputType="number"/>
 
         <ImageView
-            android:id="@+id/increaseButton"
+            android:id="@+id/increaseButtonKcal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/baseline_arrow_right_24"
@@ -60,7 +60,7 @@
         android:textSize="15sp"
         android:layout_marginTop="20sp"/>
     <Button
-        android:id="@+id/closeButton"
+        android:id="@+id/closeButtonKcal"
         android:layout_width="200sp"
         android:layout_height="wrap_content"
         android:text="Lưu"

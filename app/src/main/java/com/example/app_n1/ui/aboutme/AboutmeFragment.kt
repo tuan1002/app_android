@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.app_n1.BmrUpdate
+import com.example.app_n1.dao.logoutDao
 import com.example.app_n1.databinding.FragmentAboutmeBinding
 
 class AboutmeFragment : Fragment() {
@@ -33,6 +34,9 @@ class AboutmeFragment : Fragment() {
             updateBmrLayout() // Gọi hàm khi click vào CardView 1
         }
 
+        binding.logoutCard.setOnClickListener{
+            logoutDao(requireContext())
+        }
         return root
     }
 
@@ -45,4 +49,6 @@ class AboutmeFragment : Fragment() {
         val intent = Intent(requireActivity(), BmrUpdate::class.java) // Sử dụng requireActivity() để lấy context
         startActivity(intent)
     }
+
+
 }

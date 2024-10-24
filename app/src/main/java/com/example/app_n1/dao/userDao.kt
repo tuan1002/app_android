@@ -3,6 +3,7 @@ package com.example.app_n1.dao
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import com.example.app_n1.LoginActivity
 import com.example.app_n1.MainActivity
 import com.example.app_n1.models.User
 import com.google.firebase.database.DatabaseReference
@@ -84,6 +85,24 @@ fun loginDao(context: Context, email: String, password: String) {
     }.addOnFailureListener {
         Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
     }
+}
+
+fun logoutDao(context: Context) {
+    // Truy cập SharedPreferences
+    val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+
+    // Xóa tất cả các giá trị đã lưu trong SharedPreferences
+    editor.clear()
+    editor.apply() // Áp dụng thay đổi
+
+    // Hiển thị thông báo
+    Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+
+    // Điều hướng người dùng trở lại màn hình đăng nhập
+    val intent = Intent(context, LoginActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // Xóa ngăn xếp Activity
+    context.startActivity(intent)
 }
 
 
