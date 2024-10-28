@@ -12,10 +12,12 @@ data class User(
 
 
 data class UserInfo(
-    val userId: String = "",  // link to User
+    val userId: String = "",
     val age: Int = 0,
     val weight: Double = 0.0,
-    val height: Double = 0.0
+    val height: Double = 0.0,
+    val kcal : Long = 0L,
+    val gender : String = ""
 )
 
 data class FoodUser(

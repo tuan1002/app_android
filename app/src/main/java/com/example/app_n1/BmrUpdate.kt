@@ -8,6 +8,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.app_n1.bottomSheet.AgeBottomSheet
+import com.example.app_n1.bottomSheet.GenderBottomSheet
 import com.example.app_n1.bottomSheet.HeightBottomSheet
 import com.example.app_n1.bottomSheet.KcalBottomSheet // Nhớ import KcalBottomSheet
 import com.example.app_n1.bottomSheet.WightBottomSheet
@@ -43,6 +44,10 @@ class BmrUpdate : AppCompatActivity() {
         ageButton.setOnClickListener {
             showAgeBottomSheet()
         }
+        val genderButton: CardView = findViewById(R.id.bmr_card_5)
+        genderButton.setOnClickListener {
+            showGenderBottomSheet()
+        }
     }
 
     private fun showKcalBottomSheet() {
@@ -64,7 +69,10 @@ class BmrUpdate : AppCompatActivity() {
         val bottomSheet = AgeBottomSheet() // Khởi tạo BottomSheetDialogFragment
         bottomSheet.show(supportFragmentManager, bottomSheet.tag) // Hiển thị Bottom Sheet
     }
-
+    private fun showGenderBottomSheet() {
+        val bottomSheet = GenderBottomSheet() // Khởi tạo BottomSheetDialogFragment
+        bottomSheet.show(supportFragmentManager, bottomSheet.tag) // Hiển thị Bottom Sheet
+    }
     fun back_aboutme(view: View) {
         finish()
     }
