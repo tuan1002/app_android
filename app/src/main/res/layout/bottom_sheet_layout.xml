@@ -21,25 +21,6 @@
         android:textStyle="bold" >
     </Button>
 
-    <Button
-        android:id="@+id/cancel_button"
-        android:layout_width="match_parent"
-        android:layout_height="60sp"
-        android:text="Bữa trưa"
-        android:textStyle="bold"
-        android:backgroundTint="@color/yellow"
-        />
-
-    <Button
-        android:id="@+id/cancel_buttone"
-        android:layout_width="match_parent"
-        android:layout_height="60sp"
-        android:text="Bữa tối"
-        android:textStyle="bold"
-        android:backgroundTint="@color/red"
-
-        />
-
     <TextView
         android:id="@+id/dialog_title2"
         android:layout_width="wrap_content"

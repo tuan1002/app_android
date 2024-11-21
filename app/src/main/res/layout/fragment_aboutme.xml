@@ -53,7 +53,7 @@
                         app:layout_constraintVertical_bias="0.258" />
 
                     <TextView
-                        android:id="@+id/textView16"
+                        android:id="@+id/txt_aboutme_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Tuân Nguyễn"
@@ -142,6 +142,7 @@
 
                         <!-- Cột thứ nhất của hàng 2 -->
                         <TextView
+                            android:id="@+id/txt_aboutme_bmi"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -153,6 +154,7 @@
 
                         <!-- Cột thứ hai của hàng 2 -->
                         <TextView
+                            android:id="@+id/txt_aboutme_bmr"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -178,6 +180,7 @@
 
                         <!-- Cột thứ nhất của hàng 3 -->
                         <TextView
+                            android:id="@+id/txt_aboutme_height"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -189,6 +192,7 @@
 
                         <!-- Cột thứ hai của hàng 3 -->
                         <TextView
+                            android:id="@+id/txt_aboutme_weight"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"

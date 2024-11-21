@@ -54,7 +54,7 @@ data class Exercise(
 data class Meal(
     val mealId: String = "",
     val mealName: String = "",
-    val foods: List<Food> = listOf()
+    var foods: List<Food> = listOf()
 )
 data class WeightLog(
     val logId: String = "",      // unique ID for each weight log entry

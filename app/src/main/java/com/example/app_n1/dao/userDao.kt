@@ -2,39 +2,37 @@ package com.example.app_n1.dao
 
 import android.content.Context
 import android.content.Intent
+import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.example.app_n1.BmrUpdate
 import com.example.app_n1.Brm_register
 import com.example.app_n1.LoginActivity
 import com.example.app_n1.MainActivity
+import com.example.app_n1.R
 import com.example.app_n1.database.FirebaseUtils
+import com.example.app_n1.databinding.ActivityBmrUpdateBinding
+import com.example.app_n1.databinding.FragmentAboutmeBinding
 import com.example.app_n1.models.User
 import com.example.app_n1.models.UserInfo
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import java.security.MessageDigest
+import kotlin.math.pow
 
-private     val database: DatabaseReference = FirebaseUtils.getDatabaseReference()
-
-
+private val database: DatabaseReference = FirebaseUtils.getDatabaseReference()
 fun registerDao(context: Context, name: String, email: String, password: String) {
     // Kiểm tra xem các trường có rỗng không
     if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-        Toast.makeText(context, "ui lòng điền vào tất cả các trường có giá trị hợp lệ", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Vui lòng điền vào tất cả các trường có giá trị hợp lệ", Toast.LENGTH_SHORT).show()
         return
     }
-
-    // Kiểm tra email có tồn tại không
     checkEmailExists(context, email) { exists ->
         if (exists) {
-            // Nếu email đã tồn tại, thông báo cho người dùng
             Toast.makeText(context, "Email đã tồn tại", Toast.LENGTH_SHORT).show()
         } else {
-            // Băm mật khẩu
             val pwdHash = hashPassword(password)
             val userId = database.child("users").push().key.toString()
-
             val user = User(userId, name, email, pwdHash)
-
             // Lưu thông tin người dùng vào SharedPreferences
             val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
             sharedPreferences.edit().apply {
@@ -43,13 +41,9 @@ fun registerDao(context: Context, name: String, email: String, password: String)
                 putString("userEmail", user.email)
                 apply()
             }
-
-            // Lưu người dùng vào cơ sở dữ liệu
             database.child("users").child(userId).setValue(user)
                 .addOnSuccessListener {
                     Toast.makeText(context, "Đăng kí thành công", Toast.LENGTH_SHORT).show()
-
-                    // Chuyển sang Brm_register Activity sau khi đăng ký thành công
                     val intent = Intent(context, Brm_register::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Thêm cờ để khởi động activity từ context
                     context.startActivity(intent)
@@ -156,6 +150,60 @@ fun logoutDao(context: Context) {
     context.startActivity(intent)
 }
 
+fun getInforBmrUpdate(id: String, activity: ActivityBmrUpdateBinding) {
+
+    if (id.isNotEmpty()) {
+        val inforRef = database.child("usersInfor").child(id)
+        inforRef.get().addOnSuccessListener { dataSnapshot ->
+            val inf = dataSnapshot.getValue(UserInfo::class.java)
+            if (inf != null) {
+                activity.txtBmrUpdateKcal.text = inf.kcal.toString()
+                activity.txtBmrUpdateHeight.text = inf.height.toString()
+                activity.txtBmrUpdateWeight.text = inf.weight.toString()
+                activity.txtBmrUpdateAge.text = inf.age.toString()
+                activity.txtBmrUpdateGender.text = inf.gender.toString()
+            }
+        }
+    }
+}
+
+
+fun getInfor(id: String, binding: FragmentAboutmeBinding) {
+    if (id.isNotEmpty()) {
+        // Query the "users" table
+        val userRef = database.child("users").child(id)
+        userRef.get().addOnSuccessListener { dataSnapshot ->
+            val user = dataSnapshot.getValue(User::class.java)
+            if (user != null) {
+                binding.txtAboutmeName.text = user.name ?: "N/A"
+            }
+        }
+
+        // Query the "usersInfor" table
+        val inforRef = database.child("usersInfor").child(id)
+        inforRef.get().addOnSuccessListener { dataSnapshot ->
+            val inf = dataSnapshot.getValue(UserInfo::class.java)
+            if (inf != null) {
+                binding.txtAboutmeHeight.text = inf.height.toString() + " m"
+                binding.txtAboutmeWeight.text = inf.weight.toString() + " kg"
+                binding.txtAboutmeBmi.text = calculateBMI(inf.weight, inf.height).toString()
+                binding.txtAboutmeBmr.text = calculateBMR(inf.weight, inf.height, inf.age, inf.gender).toString()
+            }
+        }
+    }
+}
+
+fun calculateBMR(weight: Double, height: Double, age: Int, isMale: String): Double {
+    return if (isMale == "Nam") {
+        88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+    } else {
+        447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+    }
+}
+
+fun calculateBMI(weight: Double, height: Double): Double {
+    return weight / ((height).pow(2))
+}
 
 fun hashPassword(password: String): String {
     val bytes = password.toByteArray() // Chuyển chuỗi mật khẩu thành mảng byte
@@ -165,6 +213,7 @@ fun hashPassword(password: String): String {
     // Chuyển đổi giá trị băm sang dạng chuỗi hex
     return digest.fold("", { str, it -> str + "%02x".format(it) })
 }
+
 fun checkEmailExists(context: Context, email: String, callback: (Boolean) -> Unit) {
     // Kiểm tra email từ Firebase
     database.child("users").get().addOnSuccessListener { dataSnapshot ->

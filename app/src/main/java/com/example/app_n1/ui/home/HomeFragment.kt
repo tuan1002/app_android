@@ -1,6 +1,7 @@
 package com.example.app_n1.ui.home
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,13 +16,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.app_n1.Adapter.IteambreakfastAdapter
 import com.example.app_n1.Adapter.Item
 import com.example.app_n1.R
+import com.example.app_n1.RegisterActivity
 import com.example.app_n1.databinding.FragmentHomeBinding
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.components.AxisBase
+import com.example.app_n1.mealActivity
+import com.example.app_n1.models.DailyLog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class HomeFragment : Fragment() {
 
@@ -29,20 +35,11 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     // Danh sách item mà bạn muốn hiển thị
-    private val breakfastItems = listOf(
-        Item("Bữa sáng 1", "Mô tả cho bữa sáng 1"),
-        Item("Bữa sáng 2", "Mô tả cho bữa sáng 2")
-    )
-    private val lunchItems = listOf(
-        Item("Bữa trưa 1", "Mô tả cho bữa trưa 1"),
-        Item("Bữa trưa 2", "Mô tả cho bữa trưa 2")
-    )
-    private val dinnerItems = listOf(
-        Item("Bữa tối 1", "Mô tả cho bữa tối 1"),
-        Item("Bữa tối 2", "Mô tả cho bữa tối 2")
-    )
+    private val breakfastItems = mutableListOf<Item>()
+    private val lunchItems = mutableListOf<Item>()
+    private val dinnerItems = mutableListOf<Item>()
     private val activityItems = listOf(
-        Item("Đi bộ", "130 kcal - 30p"),
+        Item("Đi bộ", "130 kcal - 30p")
     )
 
     override fun onCreateView(
@@ -64,9 +61,7 @@ class HomeFragment : Fragment() {
             showCustomDialog()
         }
 
-        // Cài đặt RecyclerView
-        setupMealViews()
-
+        loadMealData()
         return root
     }
 
@@ -76,10 +71,59 @@ class HomeFragment : Fragment() {
         val textViewLunch: TextView = root.findViewById(R.id.textViewLunch)
         val textActivity: TextView = root.findViewById(R.id.textActivity)
 
-        textViewBreakfast.visibility = if (breakfastItems.isNullOrEmpty()) View.GONE else View.VISIBLE
-        textViewLunch.visibility = if (lunchItems.isNullOrEmpty()) View.GONE else View.VISIBLE
-        textViewDinner.visibility = if (dinnerItems.isNullOrEmpty()) View.GONE else View.VISIBLE
-        textActivity.visibility = if (activityItems.isNullOrEmpty()) View.GONE else View.VISIBLE
+        // Kiểm tra nếu breakfastItems không rỗng thì hiển thị textViewBreakfast
+        textViewBreakfast.visibility = if (breakfastItems.isEmpty()) View.GONE else View.VISIBLE
+        textViewLunch.visibility = if (lunchItems.isEmpty()) View.GONE else View.VISIBLE
+        textViewDinner.visibility = if (dinnerItems.isEmpty()) View.GONE else View.VISIBLE
+        textActivity.visibility = if (activityItems.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    private fun loadMealData() {
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())  // Lấy ngày hôm nay
+        val sharedPreferences = requireContext().getSharedPreferences("user_session", AppCompatActivity.MODE_PRIVATE)
+        val userId = sharedPreferences.getString("userId", null).orEmpty()  // Lấy userId từ SharedPreferences
+
+        // Lấy dữ liệu từ Firebase DailyLogs của người dùng trong ngày hôm nay
+        val logRef = FirebaseDatabase.getInstance().getReference("dailyLogs").child(userId).child(currentDate)
+
+        logRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // Xóa danh sách cũ trước khi thêm mới
+                breakfastItems.clear()
+                lunchItems.clear()
+                dinnerItems.clear()
+
+                // Lọc món ăn từ dailyLogs
+                val dailyLog = snapshot.getValue(DailyLog::class.java)
+                dailyLog?.meals?.forEach { meal ->
+                    when (meal.mealName) {
+                        "Breakfast" -> {  // Món ăn của bữa sáng
+                            meal.foods.forEach { food ->
+                                breakfastItems.add(Item(food.name, food.carbs.toString())) // Lưu foodId
+                            }
+                        }
+                        "Lunch" -> {  // Món ăn của bữa trưa
+                            meal.foods.forEach { food ->
+                                lunchItems.add(Item(food.name, food.carbs.toString())) // Lưu foodId
+                            }
+                        }
+                        "Dinner" -> {  // Món ăn của bữa tối
+                            meal.foods.forEach { food ->
+                                dinnerItems.add(Item(food.name, food.carbs.toString())) // Lưu foodId
+                            }
+                        }
+                    }
+                }
+
+                // Cập nhật lại UI sau khi tải dữ liệu
+                setupViews(requireView())
+                setupMealViews()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error if needed
+            }
+        })
     }
 
     private fun showCustomDialog() {
@@ -97,12 +141,8 @@ class HomeFragment : Fragment() {
 
         // Xử lý nút Thêm
         dialogView.findViewById<Button>(R.id.add_meal_button).setOnClickListener {
-            // Thực hiện hành động thêm bữa ăn
-            alertDialog.dismiss()
-        }
-
-        // Xử lý nút Hủy
-        dialogView.findViewById<Button>(R.id.cancel_button).setOnClickListener {
+            val intent = Intent(requireContext(), mealActivity()::class.java)
+            startActivity(intent)
             alertDialog.dismiss()
         }
 
@@ -137,66 +177,86 @@ class HomeFragment : Fragment() {
 
         // Hoạt động
         if (activityItems.isNotEmpty()) {
-            binding.recycleractivity.visibility = View.VISIBLE
-            setupRecyclerView(binding.recycleractivity, activityItems)
+
         } else {
             binding.recycleractivity.visibility = View.GONE
         }
     }
 
-    private fun setupRecyclerView(recyclerView: RecyclerView, items: List<Item>) {
+    private fun setupRecyclerView(recyclerView: RecyclerView, items: MutableList<Item>) {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        val adapter = IteambreakfastAdapter(items)
+        val adapter = IteambreakfastAdapter(items) { position ->
+            val itemToRemove = items[position]
+            val foodName = itemToRemove.name // Lấy tên món ăn cần xóa
+            val mealName = when (recyclerView.id) {
+                R.id.recyclerViewBreakfast -> "Breakfast"
+                R.id.recyclerViewLunch -> "Lunch"
+                R.id.recyclerViewDinner -> "Dinner"
+                else -> ""
+            }
+
+            // Tạo hộp thoại xác nhận xóa món ăn
+            val dialogBuilder = AlertDialog.Builder(requireContext())
+            dialogBuilder.setTitle("Xóa món ăn")
+            dialogBuilder.setMessage("Bạn có chắc chắn muốn xóa món ăn \"$foodName\" không?")
+
+            // Nếu người dùng chọn "Yes", xóa món ăn
+            dialogBuilder.setPositiveButton("Yes") { _, _ ->
+                // Xóa món ăn khỏi Firebase
+                removeMealFromFirebaseById(foodName, mealName)
+
+                // Xóa món ăn khỏi danh sách và cập nhật RecyclerView
+                items.removeAt(position)
+                recyclerView.adapter?.notifyItemRemoved(position)  // Cập nhật RecyclerView
+            }
+
+            // Nếu người dùng chọn "No", đóng hộp thoại
+            dialogBuilder.setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss() // Đóng hộp thoại nếu không muốn xóa
+            }
+
+            // Hiển thị hộp thoại xác nhận
+            dialogBuilder.create().show()
+        }
+
         recyclerView.adapter = adapter
     }
 
-    private fun setupLineChart() {
-        val lineChart = binding.lineChart
 
-        // Chuẩn bị dữ liệu cho biểu đồ
-        val entries = ArrayList<Entry>().apply {
-            add(Entry(0f, 50f))  // Ngày 1: Y = 50
-            add(Entry(1f, 60f))  // Ngày 2: Y = 60
-            add(Entry(2f, 55f))  // Ngày 3: Y = 55
-        }
+    private fun removeMealFromFirebaseById(foodname: String, mealName: String) {
+        // Lấy ngày hiện tại
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        // Tạo LineDataSet từ danh sách Entry
-        val dataSet = LineDataSet(entries, "Cân nặng").apply {
-            color = Color.BLUE  // Màu của đường
-            valueTextColor = Color.BLACK  // Màu của giá trị trên biểu đồ
-            lineWidth = 2f  // Độ dày của đường
-            setCircleColor(Color.RED)  // Màu của điểm tròn
-            circleRadius = 4f  // Kích thước của các điểm tròn
-        }
+        // Lấy userId từ SharedPreferences
+        val sharedPreferences = requireContext().getSharedPreferences("user_session", AppCompatActivity.MODE_PRIVATE)
+        val userId = sharedPreferences.getString("userId", null).orEmpty()
 
-        // Tạo LineData từ LineDataSet
-        val lineData = LineData(dataSet)
+        // Lấy dữ liệu từ Firebase DailyLogs của người dùng trong ngày hôm nay
+        val logRef = FirebaseDatabase.getInstance().getReference("dailyLogs").child(userId).child(currentDate)
 
-        // Gán dữ liệu cho LineChart
-        lineChart.data = lineData
-
-        // Cấu hình XAxis để không lặp lại ngày
-        lineChart.xAxis.apply {
-            valueFormatter = object : ValueFormatter() {
-                override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                    return when (value.toInt()) {
-                        0 -> "Ngày 1"
-                        1 -> "Ngày 2"
-                        2 -> "Ngày 3"
-                        else -> ""
+        logRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // Lấy dữ liệu DailyLog từ Firebase
+                val dailyLog = snapshot.getValue(DailyLog::class.java)
+                dailyLog?.meals?.forEach { meal ->
+                    if (meal.mealName == mealName) {
+                        // Loại bỏ món ăn theo foodId
+                        val updatedFoods = meal.foods.filterNot { it.name == foodname }.toMutableList()
+                        meal.foods = updatedFoods // Cập nhật lại foods
                     }
                 }
-            }
-            granularity = 1f  // Cho phép khoảng cách giữa các nhãn
-            isGranularityEnabled = true // Bật chế độ granularity
-            setDrawLabels(true)  // Vẽ nhãn trên trục X
-        }
 
-        lineChart.invalidate()  // Vẽ lại biểu đồ
+                // Cập nhật lại dữ liệu vào Firebase
+                logRef.setValue(dailyLog)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error if needed
+            }
+        })
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun setupLineChart() {
+
     }
 }

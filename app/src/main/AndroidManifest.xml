@@ -13,6 +13,9 @@
         android:theme="@style/Theme.App_N1"
         tools:targetApi="31">
         <activity
+            android:name=".mealActivity"
+            android:exported="false" />
+        <activity
             android:name=".Brm_register"
             android:exported="false" />
         <activity

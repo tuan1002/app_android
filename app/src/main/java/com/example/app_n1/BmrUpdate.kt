@@ -1,10 +1,10 @@
 package com.example.app_n1
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.app_n1.bottomSheet.AgeBottomSheet
@@ -12,68 +12,95 @@ import com.example.app_n1.bottomSheet.GenderBottomSheet
 import com.example.app_n1.bottomSheet.HeightBottomSheet
 import com.example.app_n1.bottomSheet.KcalBottomSheet // Nhớ import KcalBottomSheet
 import com.example.app_n1.bottomSheet.WightBottomSheet
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.app_n1.dao.getInforBmrUpdate
+import com.example.app_n1.databinding.ActivityBmrUpdateBinding
 
 class BmrUpdate : AppCompatActivity() {
+
+    private var _binding: ActivityBmrUpdateBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_bmr_update)
+
+        // Khởi tạo binding và thiết lập nội dung view
+        _binding = ActivityBmrUpdateBinding.inflate(layoutInflater)
+        setContentView(binding.root) // Sử dụng binding.root thay cho R.layout.activity_bmr_update
+
+        // Áp dụng padding cho cửa sổ
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        val kcalButton: CardView = findViewById(R.id.bmr_card_1)
-        kcalButton.setOnClickListener {
+        // Gọi getBrmUpdate() sau khi binding đã được khởi tạo
+        getBrmUpdate()
+
+        // Khởi tạo các CardView và setOnClickListener
+        binding.bmrCard1.setOnClickListener {
             showKcalBottomSheet()
         }
 
-        val heightButton: CardView = findViewById(R.id.bmr_card_2)
-        heightButton.setOnClickListener {
+        binding.bmrCard2.setOnClickListener {
             showHeightBottomSheet()
         }
 
-        val weightButton: CardView = findViewById(R.id.bmr_card_3)
-        weightButton.setOnClickListener {
+        binding.bmrCard3.setOnClickListener {
             showWeightBottomSheet()
         }
 
-        val ageButton: CardView = findViewById(R.id.bmr_card_4)
-        ageButton.setOnClickListener {
+        binding.bmrCard4.setOnClickListener {
             showAgeBottomSheet()
         }
-        val genderButton: CardView = findViewById(R.id.bmr_card_5)
-        genderButton.setOnClickListener {
+
+        binding.bmrCard5.setOnClickListener {
             showGenderBottomSheet()
         }
     }
 
+    private fun getBrmUpdate() {
+        val sharedPreferences = this.getSharedPreferences("user_session", Context.MODE_PRIVATE)
+        val userId = sharedPreferences.getString("userId", null)
+
+        // Kiểm tra userId không null
+        if (userId != null) {
+            getInforBmrUpdate(userId, binding)
+        }
+    }
+
     private fun showKcalBottomSheet() {
-        val bottomSheet = KcalBottomSheet() // Khởi tạo BottomSheetDialogFragment
-        bottomSheet.show(supportFragmentManager, bottomSheet.tag) // Hiển thị Bottom Sheet
+        val bottomSheet = KcalBottomSheet()
+        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
     }
 
     private fun showHeightBottomSheet() {
-        val bottomSheet = HeightBottomSheet() // Khởi tạo BottomSheetDialogFragment
-        bottomSheet.show(supportFragmentManager, bottomSheet.tag) // Hiển thị Bottom Sheet
+        val bottomSheet = HeightBottomSheet()
+        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
     }
 
     private fun showWeightBottomSheet() {
-        val bottomSheet = WightBottomSheet() // Khởi tạo BottomSheetDialogFragment
-        bottomSheet.show(supportFragmentManager, bottomSheet.tag) // Hiển thị Bottom Sheet
+        val bottomSheet = WightBottomSheet()
+        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
     }
 
     private fun showAgeBottomSheet() {
-        val bottomSheet = AgeBottomSheet() // Khởi tạo BottomSheetDialogFragment
-        bottomSheet.show(supportFragmentManager, bottomSheet.tag) // Hiển thị Bottom Sheet
+        val bottomSheet = AgeBottomSheet()
+        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
     }
+
     private fun showGenderBottomSheet() {
-        val bottomSheet = GenderBottomSheet() // Khởi tạo BottomSheetDialogFragment
-        bottomSheet.show(supportFragmentManager, bottomSheet.tag) // Hiển thị Bottom Sheet
+        val bottomSheet = GenderBottomSheet()
+        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
     }
+
     fun back_aboutme(view: View) {
         finish()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 }
