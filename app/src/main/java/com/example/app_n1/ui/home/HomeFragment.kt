@@ -2,7 +2,6 @@ package com.example.app_n1.ui.home
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.app_n1.Adapter.IteambreakfastAdapter
 import com.example.app_n1.Adapter.Item
 import com.example.app_n1.R
-import com.example.app_n1.RegisterActivity
 import com.example.app_n1.databinding.FragmentHomeBinding
 import com.example.app_n1.mealActivity
 import com.example.app_n1.models.DailyLog
@@ -99,17 +97,17 @@ class HomeFragment : Fragment() {
                     when (meal.mealName) {
                         "Breakfast" -> {  // Món ăn của bữa sáng
                             meal.foods.forEach { food ->
-                                breakfastItems.add(Item(food.name, food.carbs.toString())) // Lưu foodId
+                                breakfastItems.add(Item(food.name, food.calories.toString() + " Kcal")) // Lưu foodId
                             }
                         }
                         "Lunch" -> {  // Món ăn của bữa trưa
                             meal.foods.forEach { food ->
-                                lunchItems.add(Item(food.name, food.carbs.toString())) // Lưu foodId
+                                lunchItems.add(Item(food.name, food.calories.toString() + " Kcal")) // Lưu foodId
                             }
                         }
                         "Dinner" -> {  // Món ăn của bữa tối
                             meal.foods.forEach { food ->
-                                dinnerItems.add(Item(food.name, food.carbs.toString())) // Lưu foodId
+                                dinnerItems.add(Item(food.name, food.calories.toString() + " Kcal")) // Lưu foodId
                             }
                         }
                     }

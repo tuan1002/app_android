@@ -108,46 +108,64 @@ class mealActivity : AppCompatActivity() {
             return
         }
 
-        val sharedPreferences = getSharedPreferences("user_session", MODE_PRIVATE)
-        val userId = sharedPreferences.getString("userId", null).orEmpty()
+        // Hiển thị hộp thoại xác nhận
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Xác nhận")
+        builder.setMessage("Bạn có muốn thêm món ${food.name} vào $selectedMealName không?")
 
-        val currentDate = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val logRef = databaseReference.child("dailyLogs").child(userId).child(currentDate)
+        // Nếu người dùng chọn "Có"
+        builder.setPositiveButton("Có") { _, _ ->
+            val sharedPreferences = getSharedPreferences("user_session", MODE_PRIVATE)
+            val userId = sharedPreferences.getString("userId", null).orEmpty()
 
-        logRef.get().addOnSuccessListener { snapshot ->
-            val dailyLog = snapshot.getValue(DailyLog::class.java) ?: DailyLog(
-                logId = currentDate,
-                userId = userId,
-                date = currentDate,
-                meals = listOf()
-            )
+            val currentDate = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            val logRef = databaseReference.child("dailyLogs").child(userId).child(currentDate)
 
-            val updatedMeals = if (dailyLog.meals.any { it.mealName == selectedMealName }) {
-                dailyLog.meals.map { meal ->
-                    if (meal.mealName == selectedMealName) {
-                        meal.copy(foods = meal.foods + food)
-                    } else {
-                        meal
-                    }
-                }
-            } else {
-                dailyLog.meals + Meal(
-                    mealId = UUID.randomUUID().toString(),
-                    mealName = selectedMealName!!,
-                    foods = listOf(food)
+            logRef.get().addOnSuccessListener { snapshot ->
+                val dailyLog = snapshot.getValue(DailyLog::class.java) ?: DailyLog(
+                    logId = currentDate,
+                    userId = userId,
+                    date = currentDate,
+                    meals = listOf()
                 )
-            }
 
-            val updatedDailyLog = dailyLog.copy(meals = updatedMeals)
+                val updatedMeals = if (dailyLog.meals.any { it.mealName == selectedMealName }) {
+                    dailyLog.meals.map { meal ->
+                        if (meal.mealName == selectedMealName) {
+                            meal.copy(foods = meal.foods + food)
+                        } else {
+                            meal
+                        }
+                    }
+                } else {
+                    dailyLog.meals + Meal(
+                        mealId = UUID.randomUUID().toString(),
+                        mealName = selectedMealName!!,
+                        foods = listOf(food)
+                    )
+                }
 
-            logRef.setValue(updatedDailyLog).addOnSuccessListener {
-                Toast.makeText(this, "Thêm  $selectedMealName thành công", Toast.LENGTH_SHORT).show()
+                val updatedDailyLog = dailyLog.copy(meals = updatedMeals)
+
+                logRef.setValue(updatedDailyLog).addOnSuccessListener {
+                    Toast.makeText(this, "Thêm ${food.name} thành công", Toast.LENGTH_SHORT).show()
+
+                    // Chuyển icon từ X sang dấu check
+                }.addOnFailureListener {
+                    Toast.makeText(this, "Không thể thêm", Toast.LENGTH_SHORT).show()
+                }
             }.addOnFailureListener {
-                Toast.makeText(this, "Không thể thêm", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Lỗi khi tìm nạp nhật ký hàng ngày", Toast.LENGTH_SHORT).show()
             }
-        }.addOnFailureListener {
-            Toast.makeText(this, "Lỗi khi tìm nạp nhật ký hàng ngày", Toast.LENGTH_SHORT).show()
         }
+
+        // Nếu người dùng chọn "Không"
+        builder.setNegativeButton("Không") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        // Hiển thị hộp thoại
+        builder.create().show()
     }
 
 

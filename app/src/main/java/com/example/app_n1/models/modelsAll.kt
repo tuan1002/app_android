@@ -1,5 +1,6 @@
 package com.example.app_n1.models
 
+import com.example.app_n1.R
 import java.sql.Date
 
 data class User(
@@ -35,7 +36,7 @@ data class Food(
     val calories: Int = 0,
     val protein: Double = 0.0,
     val fat: Double = 0.0,
-    val carbs: Double = 0.0
+    val carbs: Double = 0.0,
 )
 data class DailyLog(
     val logId: String = "",
