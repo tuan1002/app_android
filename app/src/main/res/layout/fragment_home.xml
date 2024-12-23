@@ -165,7 +165,7 @@
                     android:layout_width="114dp"
                     android:layout_height="32dp"
                     android:layout_gravity="center"
-                    android:text="cần nạp"
+                    android:text="Tổng"
                     android:textAlignment="center"
                     android:textColor="@color/white"
 

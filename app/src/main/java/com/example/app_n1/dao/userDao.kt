@@ -194,15 +194,17 @@ fun getInfor(id: String, binding: FragmentAboutmeBinding) {
 }
 
 fun calculateBMR(weight: Double, height: Double, age: Int, isMale: String): Double {
-    return if (isMale == "Nam") {
+    val bmr = if (isMale == "Nam") {
         88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
     } else {
         447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
     }
+    return String.format("%.2f", bmr).toDouble()
 }
 
 fun calculateBMI(weight: Double, height: Double): Double {
-    return weight / ((height).pow(2))
+    val bmi = weight / (height.pow(2))
+    return String.format("%.2f", bmi).toDouble()
 }
 
 fun hashPassword(password: String): String {

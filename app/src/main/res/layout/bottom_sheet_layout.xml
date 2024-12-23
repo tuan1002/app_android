@@ -17,7 +17,7 @@
         android:id="@+id/add_meal_button"
         android:layout_width="match_parent"
         android:layout_height="60sp"
-        android:text="Bữa sáng"
+        android:text="Bữa ăn"
         android:textStyle="bold" >
     </Button>
 
@@ -25,15 +25,15 @@
         android:id="@+id/dialog_title2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hoạt động"
+        android:text="Thể dục"
         android:textSize="18sp"
         android:paddingTop="20sp"
         android:textStyle="bold" />
     <Button
-        android:id="@+id/cancel_buttones"
+        android:id="@+id/add_exercises_button"
         android:layout_width="match_parent"
         android:layout_height="60sp"
-        android:text="Tập luyện"
+        android:text="Thể dục"
         android:textStyle="bold"
         />
 </LinearLayout>

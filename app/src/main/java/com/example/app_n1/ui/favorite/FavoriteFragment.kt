@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.app_n1.databinding.FragmentFavoriteBinding
+import com.google.firebase.database.FirebaseDatabase
 
 class FavoriteFragment : Fragment() {
 
@@ -22,6 +23,7 @@ class FavoriteFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
 
         _binding = FragmentFavoriteBinding.inflate(inflater, container, false)
         val root: View = binding.root

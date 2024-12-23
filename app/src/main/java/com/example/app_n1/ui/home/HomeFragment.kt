@@ -16,6 +16,7 @@ import com.example.app_n1.Adapter.IteambreakfastAdapter
 import com.example.app_n1.Adapter.Item
 import com.example.app_n1.R
 import com.example.app_n1.databinding.FragmentHomeBinding
+import com.example.app_n1.exercise
 import com.example.app_n1.mealActivity
 import com.example.app_n1.models.DailyLog
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -36,9 +37,7 @@ class HomeFragment : Fragment() {
     private val breakfastItems = mutableListOf<Item>()
     private val lunchItems = mutableListOf<Item>()
     private val dinnerItems = mutableListOf<Item>()
-    private val activityItems = listOf(
-        Item("Đi bộ", "130 kcal - 30p")
-    )
+    private val activityItems = mutableListOf<Item>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,71 +57,146 @@ class HomeFragment : Fragment() {
         fabAddMeal.setOnClickListener {
             showCustomDialog()
         }
-
-        loadMealData()
+        val sharedPreferences = requireContext().getSharedPreferences("user_session", AppCompatActivity.MODE_PRIVATE)
+        val userId = sharedPreferences.getString("userId", null).orEmpty() // Lấy userId từ SharedPreferences
+        fetchTodayNutrientsRealtime(userId) // Thay bằng hàm realtime
+        loadMealDataRealtime()             // Thay bằng hàm realtime
         return root
     }
+
+    fun fetchTodayNutrientsRealtime(userId: String) {
+        val database = FirebaseDatabase.getInstance()
+        val dailyLogsRef = database.getReference("dailyLogs/$userId")
+
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+        dailyLogsRef.child(todayDate).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    var totalCalories = 0
+                    var totalCarbs = 0.0
+                    var totalProtein = 0.0
+                    var totalFat = 0.0
+                    var totalCaloriesBurned = 0
+
+                    snapshot.child("meals").children.forEach { mealSnapshot ->
+                        val foodsSnapshot = mealSnapshot.child("foods")
+                        foodsSnapshot.children.forEach { foodSnapshot ->
+                            val calories = foodSnapshot.child("calories").getValue(Int::class.java) ?: 0
+                            val carbs = foodSnapshot.child("carbs").getValue(Double::class.java) ?: 0.0
+                            val protein = foodSnapshot.child("protein").getValue(Double::class.java) ?: 0.0
+                            val fat = foodSnapshot.child("fat").getValue(Double::class.java) ?: 0.0
+
+                            totalCalories += calories
+                            totalCarbs += carbs
+                            totalProtein += protein
+                            totalFat += fat
+                        }
+                    }
+
+                    snapshot.child("exercises").children.forEach { exSnap ->
+                        val caloriesBurned = exSnap.child("caloriesBurned").getValue(Int::class.java) ?: 0
+                        totalCaloriesBurned += caloriesBurned
+                    }
+
+                    // Tính tổng calories còn lại
+                    val remainingCalories = totalCalories - totalCaloriesBurned
+
+                    // Hiển thị dữ liệu lên TextView
+                    binding.progressTex3.text = totalCalories.toString()
+                    binding.textView8.text = "%.0f".format(totalCarbs)
+                    binding.textView9.text = "%.0f".format(totalProtein)
+                    binding.textView10.text = "%.0f".format(totalFat)
+                    binding.progressTex4.text = totalCaloriesBurned.toString()
+                    binding.progressTex2.text = remainingCalories.toString()
+                } else {
+                    // Reset dữ liệu nếu không có log cho ngày hôm nay
+                    binding.progressTex3.text = "0"
+                    binding.textView8.text = "0"
+                    binding.textView9.text = "0"
+                    binding.textView10.text = "0"
+                    binding.progressTex4.text = "0"
+                    binding.progressTex2.text = "0"
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                println("Firebase error: ${error.message}")
+            }
+        })
+    }
+
+
 
     private fun setupViews(root: View) {
         val textViewDinner: TextView = root.findViewById(R.id.textViewDinner)
         val textViewBreakfast: TextView = root.findViewById(R.id.textViewBreakfast)
         val textViewLunch: TextView = root.findViewById(R.id.textViewLunch)
         val textActivity: TextView = root.findViewById(R.id.textActivity)
-
         // Kiểm tra nếu breakfastItems không rỗng thì hiển thị textViewBreakfast
         textViewBreakfast.visibility = if (breakfastItems.isEmpty()) View.GONE else View.VISIBLE
         textViewLunch.visibility = if (lunchItems.isEmpty()) View.GONE else View.VISIBLE
         textViewDinner.visibility = if (dinnerItems.isEmpty()) View.GONE else View.VISIBLE
         textActivity.visibility = if (activityItems.isEmpty()) View.GONE else View.VISIBLE
+        // Hoạt động (bài tập)
+        if (activityItems.isNotEmpty()) {
+            binding.recycleractivity.visibility = View.VISIBLE
+            setupRecyclerView(binding.recycleractivity, activityItems)
+        } else {
+            binding.recycleractivity.visibility = View.GONE
+        }
     }
 
-    private fun loadMealData() {
-        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())  // Lấy ngày hôm nay
+    private fun loadMealDataRealtime() {
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val sharedPreferences = requireContext().getSharedPreferences("user_session", AppCompatActivity.MODE_PRIVATE)
-        val userId = sharedPreferences.getString("userId", null).orEmpty()  // Lấy userId từ SharedPreferences
+        val userId = sharedPreferences.getString("userId", null).orEmpty()
 
-        // Lấy dữ liệu từ Firebase DailyLogs của người dùng trong ngày hôm nay
         val logRef = FirebaseDatabase.getInstance().getReference("dailyLogs").child(userId).child(currentDate)
 
         logRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                // Xóa danh sách cũ trước khi thêm mới
                 breakfastItems.clear()
                 lunchItems.clear()
                 dinnerItems.clear()
+                activityItems.clear()
 
-                // Lọc món ăn từ dailyLogs
                 val dailyLog = snapshot.getValue(DailyLog::class.java)
                 dailyLog?.meals?.forEach { meal ->
                     when (meal.mealName) {
-                        "Breakfast" -> {  // Món ăn của bữa sáng
+                        "Breakfast" -> {
                             meal.foods.forEach { food ->
-                                breakfastItems.add(Item(food.name, food.calories.toString() + " Kcal")) // Lưu foodId
+                                breakfastItems.add(Item(food.name, "${food.calories} Kcal"))
                             }
                         }
-                        "Lunch" -> {  // Món ăn của bữa trưa
+                        "Lunch" -> {
                             meal.foods.forEach { food ->
-                                lunchItems.add(Item(food.name, food.calories.toString() + " Kcal")) // Lưu foodId
+                                lunchItems.add(Item(food.name, "${food.calories} Kcal"))
                             }
                         }
-                        "Dinner" -> {  // Món ăn của bữa tối
+                        "Dinner" -> {
                             meal.foods.forEach { food ->
-                                dinnerItems.add(Item(food.name, food.calories.toString() + " Kcal")) // Lưu foodId
+                                dinnerItems.add(Item(food.name, "${food.calories} Kcal"))
                             }
                         }
                     }
                 }
 
-                // Cập nhật lại UI sau khi tải dữ liệu
+                dailyLog?.exercises?.forEach { exercise ->
+                    activityItems.add(Item(exercise.name, "${exercise.caloriesBurned}"))
+                }
+
+                // Cập nhật lại UI
                 setupViews(requireView())
                 setupMealViews()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle error if needed
+                println("Firebase error: ${error.message}")
             }
         })
     }
+
 
     private fun showCustomDialog() {
         // Tạo AlertDialog Builder
@@ -140,6 +214,12 @@ class HomeFragment : Fragment() {
         // Xử lý nút Thêm
         dialogView.findViewById<Button>(R.id.add_meal_button).setOnClickListener {
             val intent = Intent(requireContext(), mealActivity()::class.java)
+            startActivity(intent)
+            alertDialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.add_exercises_button).setOnClickListener{
+            val intent = Intent(requireContext(), exercise()::class.java)
             startActivity(intent)
             alertDialog.dismiss()
         }
@@ -175,7 +255,8 @@ class HomeFragment : Fragment() {
 
         // Hoạt động
         if (activityItems.isNotEmpty()) {
-
+            binding.recycleractivity.visibility = View.VISIBLE
+            setupRecyclerView(binding.recycleractivity, activityItems)
         } else {
             binding.recycleractivity.visibility = View.GONE
         }
@@ -253,6 +334,7 @@ class HomeFragment : Fragment() {
             }
         })
     }
+
 
     private fun setupLineChart() {
 

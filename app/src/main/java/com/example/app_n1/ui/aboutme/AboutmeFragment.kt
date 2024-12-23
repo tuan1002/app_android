@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.app_n1.BmrUpdate
+import com.example.app_n1.CaloChart
 import com.example.app_n1.dao.getInfor
 import com.example.app_n1.dao.logoutDao
 import com.example.app_n1.databinding.FragmentAboutmeBinding
@@ -30,6 +31,10 @@ class AboutmeFragment : Fragment() {
             updateBmrLayout()
         }
 
+        binding.caloChart.setOnClickListener{
+            CaloChart()
+        }
+
         binding.logoutCard.setOnClickListener {
             logoutDao(requireContext())
         }
@@ -47,7 +52,10 @@ class AboutmeFragment : Fragment() {
         val intent = Intent(requireActivity(), BmrUpdate::class.java)
         startActivity(intent)
     }
-
+    private fun CaloChart() {
+        val intent = Intent(requireActivity(), CaloChart::class.java)
+        startActivity(intent)
+    }
     private fun showInfor() {
         val sharedPreferences = context?.getSharedPreferences("user_session", Context.MODE_PRIVATE)
         val userId = sharedPreferences?.getString("userId", null).toString()
